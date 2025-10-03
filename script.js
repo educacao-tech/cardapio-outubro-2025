@@ -10,6 +10,8 @@ function initializeApp(menuLinks) {
     const weekSections = document.querySelectorAll('.button-column');
     const container = document.querySelector('.columns-container');
 
+    let activeWeeksFound = false;
+
     weekSections.forEach(section => {
         const weekId = section.id;
         const weekData = menuLinks[weekId];
@@ -20,6 +22,8 @@ function initializeApp(menuLinks) {
             section.remove();
             return; // Pula para a próxima iteração do loop.
         }
+
+        activeWeeksFound = true;
 
         // Se a semana é válida, continua com a lógica para adicionar links e destacar a semana.
         const buttons = section.querySelectorAll('.button');
@@ -67,6 +71,12 @@ function initializeApp(menuLinks) {
             section.classList.add('past-week');
         }
     });
+
+    // Se, após o loop, nenhuma semana ativa foi encontrada, exibe a mensagem.
+    if (!activeWeeksFound) {
+        const messageBox = document.getElementById('no-weeks-message');
+        if (messageBox) messageBox.style.display = 'block';
+    }
 
     // --- Lógica para o botão "Voltar ao Topo" ---
     const backToTopButton = document.getElementById("back-to-top");
