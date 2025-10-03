@@ -10,30 +10,29 @@ function initializeApp(menuLinks) {
     const weekSections = document.querySelectorAll('.button-column');
     const container = document.querySelector('.columns-container');
 
-    // Pega as chaves (IDs das semanas) do objeto de links. Ex: ["semana1", "semana2", ...]
-    const validWeekIds = Object.keys(menuLinks);
-
     weekSections.forEach(section => {
         const weekId = section.id;
+        const weekData = menuLinks[weekId];
 
-        // Se o ID da seção do HTML não existir no arquivo JSON, remove a seção da página.
-        if (!validWeekIds.includes(weekId)) {
+        // Se a semana não existir no JSON ou estiver marcada como inativa, remove a seção da página.
+        // A verificação `weekData.active !== false` trata `undefined` (se a propriedade não existir) como ativo.
+        if (!weekData || weekData.active === false) {
             section.remove();
             return; // Pula para a próxima iteração do loop.
         }
 
         // Se a semana é válida, continua com a lógica para adicionar links e destacar a semana.
-        const linksForWeek = menuLinks[weekId];
         const buttons = section.querySelectorAll('.button');
         buttons.forEach(button => {
-            const buttons = section.querySelectorAll('.button');
-            buttons.forEach(button => {
-                // Encontra a classe que corresponde à chave no objeto de links (ex: 'creche-m-verde')
-                const buttonTypeClass = Array.from(button.classList).find(cls => linksForWeek[cls]);
-                if (buttonTypeClass && linksForWeek[buttonTypeClass]) {
-                    button.href = linksForWeek[buttonTypeClass];
-                }
-            });
+            // Encontra a classe que corresponde à chave no objeto de links (ex: 'creche-m-verde')
+            const buttonTypeClass = Array.from(button.classList).find(cls => weekData[cls] !== undefined);
+            const link = buttonTypeClass ? weekData[buttonTypeClass] : '';
+
+            if (link) {
+                button.href = link;
+            } else {
+                button.classList.add('disabled');
+            }
         });
 
         const timeTags = section.querySelectorAll('time');
