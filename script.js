@@ -10,11 +10,22 @@ function initializeApp(menuLinks) {
     const weekSections = document.querySelectorAll('.button-column');
     const container = document.querySelector('.columns-container');
 
+    // Pega as chaves (IDs das semanas) do objeto de links. Ex: ["semana1", "semana2", ...]
+    const validWeekIds = Object.keys(menuLinks);
+
     weekSections.forEach(section => {
         const weekId = section.id;
-        const linksForWeek = menuLinks[weekId];
 
-        if (linksForWeek) {
+        // Se o ID da seção do HTML não existir no arquivo JSON, remove a seção da página.
+        if (!validWeekIds.includes(weekId)) {
+            section.remove();
+            return; // Pula para a próxima iteração do loop.
+        }
+
+        // Se a semana é válida, continua com a lógica para adicionar links e destacar a semana.
+        const linksForWeek = menuLinks[weekId];
+        const buttons = section.querySelectorAll('.button');
+        buttons.forEach(button => {
             const buttons = section.querySelectorAll('.button');
             buttons.forEach(button => {
                 // Encontra a classe que corresponde à chave no objeto de links (ex: 'creche-m-verde')
@@ -23,38 +34,31 @@ function initializeApp(menuLinks) {
                     button.href = linksForWeek[buttonTypeClass];
                 }
             });
-        }
+        });
 
         const timeTags = section.querySelectorAll('time');
         // Garante que temos as duas tags de data (início e fim)
-        if (timeTags.length < 2) {
-            return;
-        }
+        if (timeTags.length < 2) return;
 
         const startDateAttr = timeTags[0].getAttribute('datetime');
         const endDateAttr = timeTags[1].getAttribute('datetime');
 
-        if (!startDateAttr || !endDateAttr) {
-            return;
-        }
+        if (!startDateAttr || !endDateAttr) return;
 
         // Converte as strings de data (YYYY-MM-DD) para objetos Date
         // O -1 no mês é porque os meses em JS são de 0 a 11
         const startParts = startDateAttr.split('-');
         const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-
         const endParts = endDateAttr.split('-');
         const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
 
         // Compara as datas e adiciona as classes CSS
         if (today >= startDate && today <= endDate) {
             section.classList.add('current-week');
-
             // Move a coluna da semana atual para ser a primeira
             if (container) {
                 container.prepend(section);
             }
-
             // Faz a página rolar suavemente para a semana atual
             section.scrollIntoView({
                 behavior: 'smooth',
