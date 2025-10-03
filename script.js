@@ -1,5 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Pega a data de hoje e zera as horas para comparar apenas os dias
+/**
+ * Função principal que inicializa todas as funcionalidades da página.
+ * @param {object} menuLinks - O objeto contendo os links dos cardápios.
+ */
+function initializeApp(menuLinks) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -8,6 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.columns-container');
 
     weekSections.forEach(section => {
+        const weekId = section.id;
+        const linksForWeek = menuLinks[weekId];
+
+        if (linksForWeek) {
+            const buttons = section.querySelectorAll('.button');
+            buttons.forEach(button => {
+                // Encontra a classe que corresponde à chave no objeto de links (ex: 'creche-m-verde')
+                const buttonTypeClass = Array.from(button.classList).find(cls => linksForWeek[cls]);
+                if (buttonTypeClass && linksForWeek[buttonTypeClass]) {
+                    button.href = linksForWeek[buttonTypeClass];
+                }
+            });
+        }
+
         const timeTags = section.querySelectorAll('time');
         // Garante que temos as duas tags de data (início e fim)
         if (timeTags.length < 2) {
@@ -61,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        window.addEventListener("scroll", scrollFunction);
+        window.addEventListener("scroll", scrollFunction, { passive: true });
 
         // Rola para o topo quando o botão é clicado
         backToTopButton.addEventListener('click', () => {
@@ -134,4 +151,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Observa cada coluna de cardápio
     document.querySelectorAll('.button-column').forEach(column => observer.observe(column));
-});
+}
+
+/**
+ * Carrega os links dos cardápios do arquivo JSON e inicializa a aplicação.
+ */
+async function loadMenuData() {
+    try {
+        const response = await fetch('menu-links.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const menuLinks = await response.json();
+        initializeApp(menuLinks);
+    } catch (error) {
+        console.error("Não foi possível carregar os links dos cardápios:", error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadMenuData);
